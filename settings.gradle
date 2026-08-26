@@ -1,0 +1,2 @@
+rootProject.name = "guzelduatr-app"
+include ":app"
