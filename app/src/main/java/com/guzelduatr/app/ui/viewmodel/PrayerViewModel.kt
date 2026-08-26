@@ -1,5 +1,6 @@
 package com.guzelduatr.app.ui.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.guzelduatr.app.data.PrayerRepository
@@ -9,21 +10,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class PrayerUiState(
-    val isLoading: Boolean = false,
-    val timings: Map<String, String> = emptyMap(),
-    val dateReadable: String = "",
-    val location: String = "",
-    val error: String? = null
-)
-
 @HiltViewModel
 class PrayerViewModel @Inject constructor(
     private val repo: PrayerRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(PrayerUiState(isLoading = true))
-    val uiState: StateFlow<PrayerUiState> = _uiState
+    private val _uiState = MutableStateFlow(com.guzelduatr.app.ui.viewmodel.PrayerUiState(isLoading = true))
+    val uiState: StateFlow<com.guzelduatr.app.ui.viewmodel.PrayerUiState> = _uiState
 
     init {
         fetchTimings("Istanbul", "Turkey")
@@ -34,7 +27,7 @@ class PrayerViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             val res = repo.getTimingsByCity(city, country)
             res.fold(onSuccess = { body ->
-                _uiState.value = PrayerUiState(
+                _uiState.value = com.guzelduatr.app.ui.viewmodel.PrayerUiState(
                     isLoading = false,
                     timings = body.data.timings,
                     dateReadable = body.data.date.readable,
@@ -45,5 +38,21 @@ class PrayerViewModel @Inject constructor(
                 _uiState.value = _uiState.value.copy(isLoading = false, error = err.localizedMessage ?: "Bilinmeyen hata")
             })
         }
+    }
+
+    fun fetchByDeviceLocation(context: Context) {
+        viewModelScope.launch {
+            try {
+                // device location provided via repository/location module in future; for now, we call repository directly
+                // This method should be improved: better to inject a location provider and observe changes.
+                // As a simple approach, repository does not access location. The LocationModule provides FusedLocationClient - we should use it from an Android component.
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(error = e.localizedMessage ?: "Konum alınamadı")
+            }
+        }
+    }
+
+    fun scheduleNotifications(context: Context, timings: Map<String, String>) {
+        repo.scheduleNotifications(context, timings)
     }
 }

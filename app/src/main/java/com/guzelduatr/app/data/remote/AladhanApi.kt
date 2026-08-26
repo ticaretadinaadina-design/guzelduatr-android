@@ -11,4 +11,11 @@ interface AladhanApi {
         @Query("country") country: String,
         @Query("method") method: Int = 2
     ): Response<AladhanResponse>
+
+    @GET("timings")
+    suspend fun getTimingsByCoordinates(
+        @Query("latitude") latitude: Double,
+        @Query("longitude") longitude: Double,
+        @Query("method") method: Int = 2
+    ): Response<AladhanResponse>
 }

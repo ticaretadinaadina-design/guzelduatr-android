@@ -1,5 +1,7 @@
 package com.guzelduatr.app.ui.screens
 
+import android.Manifest
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -7,16 +9,26 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.guzelduatr.app.ui.viewmodel.PrayerViewModel
+import com.guzelduatr.app.util.NotificationHelper
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberPermissionState
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun NamazVakitleriScreen(viewModel: PrayerViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     var city by remember { mutableStateOf("Istanbul") }
     var country by remember { mutableStateOf("Turkey") }
+
+    LaunchedEffect(Unit) {
+        NotificationHelper.createChannel(context)
+    }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Row(
@@ -38,6 +50,10 @@ fun NamazVakitleriScreen(viewModel: PrayerViewModel = hiltViewModel()) {
                 } else {
                     Button(onClick = { viewModel.fetchTimings(city, country) }) {
                         Text("Güncelle")
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(onClick = { viewModel.fetchByDeviceLocation(context) }) {
+                        Text("Konuma göre güncelle")
                     }
                 }
             }
@@ -69,6 +85,16 @@ fun NamazVakitleriScreen(viewModel: PrayerViewModel = hiltViewModel()) {
                             }
                         }
                     }
+                }
+
+                Spacer(Modifier.height(12.dp))
+                Button(onClick = {
+                    // schedule notifications
+                    viewModel.uiState.value.timings.let { timings ->
+                        viewModel.scheduleNotifications(LocalContext.current, timings)
+                    }
+                }) {
+                    Text("Bildirimleri Planla")
                 }
             }
         }

@@ -74,10 +74,16 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.2'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2'
 
-    // Room (optional for zikir persistence)
+    // Room
     implementation 'androidx.room:room-runtime:2.6.1'
     kapt 'androidx.room:room-compiler:2.6.1'
     implementation 'androidx.room:room-ktx:2.6.1'
+
+    // Play Services Location
+    implementation 'com.google.android.gms:play-services-location:21.0.1'
+
+    // WorkManager
+    implementation 'androidx.work:work-runtime-ktx:2.8.1'
 
     // Testing
     testImplementation 'junit:junit:4.13.2'
